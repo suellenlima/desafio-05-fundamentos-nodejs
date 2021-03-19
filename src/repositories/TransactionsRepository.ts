@@ -5,7 +5,6 @@ interface CreateTransactionDTO {
   value: number;
   type: 'income' | 'outcome';
 }
-
 interface Balance {
   income: number;
   outcome: number;
@@ -24,30 +23,26 @@ class TransactionsRepository {
   }
 
   public getBalance(): Balance {
-    const income = this.transactions.reduce((incomeIncrement, transaction) => {
-      if (transaction.type === 'income') {
-        return incomeIncrement + transaction.value;
-      }
-
-      return incomeIncrement + 0;
-    }, 0);
-
-    const outcome = this.transactions.reduce(
-      (outcomeIncrement, transaction) => {
-        if (transaction.type === 'outcome') {
-          return outcomeIncrement + transaction.value;
+    const balance = this.transactions.reduce(
+      (accumulator: Balance, currentValue: Transaction) => {
+        switch (currentValue.type) {
+          case 'income':
+            accumulator.income += currentValue.value;
+            accumulator.total += currentValue.value;
+            break;
+          case 'outcome':
+            accumulator.outcome += currentValue.value;
+            accumulator.total -= currentValue.value;
+            break;
+          default:
+            break;
         }
-
-        return outcomeIncrement + 0;
+        return accumulator;
       },
-      0,
+      { income: 0, outcome: 0, total: 0 },
     );
 
-    return {
-      income,
-      outcome,
-      total: income - outcome,
-    };
+    return balance;
   }
 
   public create({ title, value, type }: CreateTransactionDTO): Transaction {
@@ -55,7 +50,7 @@ class TransactionsRepository {
 
     this.transactions.push(transaction);
 
-    return transaction;
+    return transaction || null;
   }
 }
 

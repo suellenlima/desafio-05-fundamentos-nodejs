@@ -3,14 +3,14 @@ import { Router } from 'express';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 
-const transactionRouter = Router();
+const transactionRepository = new TransactionsRepository();
 
-const transactionsRepository = new TransactionsRepository();
+const transactionRouter = Router();
 
 transactionRouter.get('/', (request, response) => {
   try {
-    const transactions = transactionsRepository.all();
-    const balance = transactionsRepository.getBalance();
+    const transactions = transactionRepository.all();
+    const balance = transactionRepository.getBalance();
 
     return response.json({ transactions, balance });
   } catch (err) {
@@ -22,11 +22,11 @@ transactionRouter.post('/', (request, response) => {
   try {
     const { title, value, type } = request.body;
 
-    const CreateTransaction = new CreateTransactionService(
-      transactionsRepository,
+    const createTransaction = new CreateTransactionService(
+      transactionRepository,
     );
 
-    const transaction = CreateTransaction.execute({ title, value, type });
+    const transaction = createTransaction.execute({ title, value, type });
 
     return response.json(transaction);
   } catch (err) {
